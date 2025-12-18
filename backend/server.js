@@ -10,10 +10,14 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 
 // Middleware
+// Enable CORS with specific configuration
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://jagan-b-portfolio.vercel.app']
-    : 'http://localhost:5173',
+  origin: [
+    'https://jagan-b-portfolio.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ],
+  credentials: true,
   optionsSuccessStatus: 200
 };
 
