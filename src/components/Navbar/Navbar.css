@@ -1,0 +1,245 @@
+/* Navbar.css */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 10vh;
+  z-index: 1000;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(77, 91, 206, 0.2);
+  transition: all 0.4s ease;
+}
+
+.navbar-content {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.8rem 6.4rem;
+  position: relative;
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.nav-link {
+  position: relative;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.05rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.nav-link:hover {
+  color: var(--text-primary);
+  background: rgba(77, 91, 206, 0.15);
+}
+
+.nav-link.active {
+  color: #fff;
+  background: linear-gradient(90deg, rgba(77, 91, 206, 0.3), rgba(77, 91, 206, 0.1));
+  box-shadow: 0 0 15px rgba(77, 91, 206, 0.2);
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #4d5bce, #38b2ac);
+  border-radius: 2px;
+}
+
+/* Resume Dropdown Styles */
+.resume-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(90deg, #4d5bce, #5a67d8);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 0.6rem 1.5rem;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(77, 91, 206, 0.3);
+}
+
+.resume-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(77, 91, 206, 0.4);
+}
+
+.resume-dropdown-menu {
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background: rgba(26, 26, 74, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(77, 91, 206, 0.3);
+  border-radius: 8px;
+  padding: 0.8rem 0;
+  min-width: 200px;
+  box-shadow: 0 10px 30px;
+  z-index: 1001;
+  overflow: hidden;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem 1.5rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background: rgba(77, 91, 206, 0.2);
+  color: var(--text-primary);
+}
+
+/* Mobile Menu Styles */
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.8rem;
+  cursor: pointer;
+  z-index: 1002;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-btn:hover {
+  color: var(--accent);
+}
+
+/* Mobile View */
+@media (max-width: 992px) {
+  .navbar-content {
+    padding: 0.8rem 1.5rem;
+    justify-content: space-between;
+  }
+  
+  .mobile-menu-btn {
+    display: block;
+  }
+  
+  .nav-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 300px;
+    height: 100vh;
+    background: rgba(13, 13, 47, 0.95);
+    backdrop-filter: blur(15px);
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 6rem 2rem 2rem;
+    transition: all 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+    z-index: 1001;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
+    border-left: 1px solid rgba(77, 91, 206, 0.2);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  
+  .nav-menu.active {
+    right: 0;
+  }
+
+  /* Show scrollbar for nav-menu on overflow */
+  .nav-menu::-webkit-scrollbar {
+    width: 8px;
+    background: rgba(77, 91, 206, 0.08);
+  }
+  .nav-menu::-webkit-scrollbar-thumb {
+    background: rgba(77, 91, 206, 0.25);
+    border-radius: 8px;
+  }
+  
+  .nav-link {
+    width: 100%;
+    padding: 1rem 1.2rem;
+    font-size: 1.2rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .resume-dropdown.mobile-only {
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
+  }
+  
+  .resume-dropdown:not(.mobile-only) {
+    display: none;
+  }
+  
+  .resume-button {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem;
+    font-size: 1.1rem;
+  }
+  
+  .resume-dropdown-menu {
+    position: static;
+    width: 100%;
+    margin-top: 0.5rem;
+    background: rgba(26, 26, 74, 0.8);
+  }
+  
+  .theme-toggle-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem;
+    font-size: 1.1rem;
+    margin-left: 0;
+    margin-top: 1rem;
+  }
+}
+
+/* Small Mobile Devices */
+@media (max-width: 480px) {
+  .nav-menu {
+    width: 250px;
+  }
+}
+
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(90deg, #4d5bce, #5a67d8);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 0.6rem 1.5rem;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(77, 91, 206, 0.15);
+}
+.theme-toggle-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(77, 91, 206, 0.25);
+}

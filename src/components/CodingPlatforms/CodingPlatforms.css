@@ -1,0 +1,241 @@
+/* CodingPlatforms.css */
+.single-column-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.platform-single {
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(77, 91, 206, 0.3);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* .platform-single::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(90deg, #4d5bce, #38b2ac);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+} */
+
+/* .platform-single:hover::before {
+  transform: scaleX(1);
+} */
+
+.platform-card-single {
+  all: unset;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 25px;
+}
+
+.platform-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(77, 91, 206, 0.2);
+}
+
+.platform-icon {
+  font-size: 3rem;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 8px rgba(77, 91, 206, 0.5));
+}
+
+.leetcode .platform-icon {
+  color: #ffa116;
+}
+
+.github .platform-icon {
+  color: #fff;
+}
+
+.platform-header h3 {
+  font-size: 1.8rem;
+  margin: 0;
+  background: linear-gradient(90deg, #4d5bce, #38b2ac);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+.platform-stats-section,
+.platform-heatmap-section {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.platform-stats-img,
+.platform-submissions-img,
+.platform-heatmap-img {
+  height: auto;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 10px;
+  margin: 1rem auto;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.leetcode .platform-stats-img {
+  max-height: 300px;
+}
+
+.platform-heatmap-img {
+  max-height: 150px;
+}
+
+.stats-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.platform-stats-img:hover,
+.platform-heatmap-img:hover {
+  transform: scale(1.02);
+}
+
+.platform-heatmap-section h4 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.stats-fallback,
+.heatmap-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+  text-align: center;
+  padding: 1rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  background: rgba(77, 91, 206, 0.1);
+  border-radius: 10px;
+  margin: 1rem 0;
+}
+
+.cta-button {
+  display: inline-block;
+  background: linear-gradient(90deg, #4d5bce, #5a67d8);
+  color: white;
+  border-radius: 50px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(77, 91, 206, 0.4);
+  align-self: center;
+}
+
+.cta-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(77, 91, 206, 0.6);
+  background: linear-gradient(90deg, #5a67d8, #4d5bce);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .single-column-layout {
+    gap: 1.5rem;
+  }
+  
+  .platform-card-single {
+    padding: 1.5rem;
+  }
+  
+  .platform-icon {
+    font-size: 2.5rem;
+  }
+  
+  .platform-header h3 {
+    font-size: 1.5rem;
+  }
+  
+  .platform-stats-img,
+  .platform-heatmap-img {
+    max-height: 180px;
+  }
+  
+  .leetcode .platform-stats-img {
+    max-height: 220px;
+  }
+  
+  .platform-heatmap-img {
+    max-height: 120px;
+  }
+  
+  .platform-header {
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .single-column-layout {
+    gap: 1rem;
+  }
+  
+  .platform-card-single {
+    padding: 1rem;
+  }
+  
+  .platform-icon {
+    font-size: 2rem;
+  }
+  
+  .platform-header h3 {
+    font-size: 1.3rem;
+  }
+  
+  .platform-heatmap-section h4 {
+    font-size: 1rem;
+  }
+  
+  .cta-button {
+    padding: 0.7rem 1.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .platform-stats-img,
+  .platform-heatmap-img {
+    max-height: 150px;
+  }
+  
+  .leetcode .platform-stats-img {
+    max-height: 180px;
+  }
+  
+  .platform-heatmap-img {
+    max-height: 100px;
+  }
+  
+  .platform-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  
+  .platform-stats-section,
+  .platform-heatmap-section {
+    text-align: center;
+  }
+}

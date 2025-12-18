@@ -1,0 +1,113 @@
+/* Footer.css */
+.footer {
+  background:transparent;
+  padding: 3rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, rgba(93, 107, 230, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.footer-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.footer-content p {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #cbd5e0;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+.footer-signature {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: rgba(203, 213, 224, 0.6);
+  font-style: italic;
+}
+
+.heart {
+  color: #ff4d6d;
+  display: inline-block;
+  animation: pulse 1.5s infinite;
+  text-shadow: 0 0 8px rgba(255, 77, 109, 0.6);
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.footer-content::after {
+  content: '';
+  display: block;
+  width: 80px;
+  height: 2px;
+  background: linear-gradient(90deg, #4d5bce, #38b2ac);
+  margin: 1.5rem auto;
+  border-radius: 2px;
+}
+
+/* Decorative elements */
+.footer-decoration {
+  position: absolute;
+  opacity: 0.1;
+}
+
+.footer-decoration.circle {
+  width: 200px;
+  height: 200px;
+  border: 2px solid #4d5bce;
+  border-radius: 50%;
+  top: -100px;
+  left: -100px;
+}
+
+.footer-decoration.triangle {
+  width: 0;
+  height: 0;
+  border-left: 100px solid transparent;
+  border-right: 100px solid transparent;
+  border-bottom: 170px solid #5d6be6;
+  bottom: -80px;
+  right: -50px;
+  transform: rotate(25deg);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .footer {
+    padding: 2rem 0;
+  }
+  
+  .footer-content p {
+    font-size: 1rem;
+  }
+  
+  .footer-decoration.circle,
+  .footer-decoration.triangle {
+    display: none;
+  }
+}
