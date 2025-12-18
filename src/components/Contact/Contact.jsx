@@ -33,12 +33,27 @@ const Contact = ({ createSpark }) => {
       formDataToSend.append('contact', formData.contact);
       formDataToSend.append('description', formData.description);
       
-      const response = await fetch('https://formspree.io/f/xvzppndy', {
+      // Convert FormData to JSON for our self-hosted endpoint
+      const jsonData = {
+        name: formData.name,
+        contact: formData.contact,
+        description: formData.description
+      };
+      
+      // For development, use localhost:3001
+      // For production, use your Render backend URL
+      // TODO: Replace 'your-render-backend-app-name' with your actual Render backend app name
+      const backendUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://your-render-backend-app-name.onrender.com/api/contact' 
+        : 'http://localhost:3001/api/contact';
+      
+      const response = await fetch(backendUrl, {
         method: 'POST',
-        body: formDataToSend,
         headers: {
+          'Content-Type': 'application/json',
           'Accept': 'application/json'
-        }
+        },
+        body: JSON.stringify(jsonData)
       });
       
       if (response.ok) {
