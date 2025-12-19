@@ -3,7 +3,6 @@ const cors = require('cors');
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
 const path = require('path');
-const fs = require('fs').promises;
 require('dotenv').config();
 
 const app = express();
@@ -94,35 +93,12 @@ app.post('/api/contact', async (req, res) => {
     } catch (emailError) {
       console.error('Email sending failed:', emailError);
       
-      // Save to file as backup
-      try {
-        const timestamp = new Date().toISOString();
-        const submissionData = {
-          timestamp,
-          name,
-          contact,
-          description
-        };
-        
-        // Create submissions directory if it doesn't exist
-        const submissionsDir = path.join(__dirname, 'submissions');
-        await fs.mkdir(submissionsDir, { recursive: true });
-        
-        // Save submission to file
-        const fileName = `submission-${timestamp.replace(/[:.]/g, '-')}.json`;
-        const filePath = path.join(submissionsDir, fileName);
-        await fs.writeFile(filePath, JSON.stringify(submissionData, null, 2));
-        
-        console.log('Submission saved to file:', filePath);
-        
-        res.status(200).json({ 
-          success: true, 
-          message: 'Message received! (Email delivery failed but your message was saved.)' 
-        });
-      } catch (fileError) {
-        console.error('Failed to save submission to file:', fileError);
-        throw emailError; // Re-throw the original email error
-      }
+      // Return error without saving to file
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to send message. Please try again later.',
+        error: process.env.NODE_ENV === 'development' ? emailError.message : undefined
+      });
     }
   } catch (error) {
     console.error('Error sending email:', error);
