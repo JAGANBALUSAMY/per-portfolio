@@ -3,7 +3,13 @@ const cors = require('cors');
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
 const path = require('path');
+// Load environment variables
 require('dotenv').config();
+
+// Log environment variables for debugging (without exposing sensitive data)
+console.log('Environment variables loaded:');
+console.log('- EMAIL_USER:', process.env.EMAIL_USER ? 'SET' : 'NOT SET');
+console.log('- PORT:', process.env.PORT || 'Using default');
 
 const app = express();
 // Use Render's PORT or default to 10000
@@ -48,6 +54,15 @@ app.post('/api/contact', async (req, res) => {
       return res.status(500).json({ 
         success: false, 
         message: 'Email configuration error. Please contact administrator.' 
+      });
+    }
+
+    // Validate environment variables
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error('Missing EMAIL_USER or EMAIL_PASS environment variables');
+      return res.status(500).json({
+        success: false,
+        message: 'Server configuration error. Please contact administrator.'
       });
     }
 
