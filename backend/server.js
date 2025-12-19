@@ -6,7 +6,9 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
+// Use Render's PORT or default to 10000
 const PORT = process.env.PORT || 10000;
+console.log(`Server starting on port ${PORT}`);
 
 // Middleware
 // Enable CORS with specific configuration
@@ -101,23 +103,19 @@ app.post('/api/contact', async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('Unexpected error in contact form handler:', error);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    });
     // Check if headers have already been sent
     if (!res.headersSent) {
-      // Handle specific network timeout errors
-      if (error.code === 'ESOCKET' || error.code === 'ETIMEDOUT') {
-        res.status(500).json({ 
-          success: false, 
-          message: 'Unable to connect to email server. Please try again later or contact via email directly.',
-          error: process.env.NODE_ENV === 'development' ? error.message : undefined
-        });
-      } else {
-        res.status(500).json({ 
-          success: false, 
-          message: 'Failed to send message. Please try again later.',
-          error: process.env.NODE_ENV === 'development' ? error.message : undefined
-        });
-      }
+      res.status(500).json({ 
+        success: false, 
+        message: 'Internal server error. Please try again later.',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
     }
   }
 });
