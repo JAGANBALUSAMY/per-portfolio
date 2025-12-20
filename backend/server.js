@@ -1,12 +1,11 @@
 const express = require('express');
 const cors = require('cors');
-const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
 const path = require('path');
 require('dotenv').config();
 
 console.log('Environment variables loaded:');
-console.log('- EMAIL_USER:', process.env.EMAIL_USER ? 'SET' : 'NOT SET');
+console.log('- BREVO_API_KEY:', process.env.BREVO_API_KEY ? 'SET' : 'NOT SET');
 console.log('- PORT:', process.env.PORT || 'Using default');
 
 const app = express();
@@ -28,8 +27,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.post('/api/contact', async (req, res) => {
-  let transporter; // ✅ FIX: moved here (GLOBAL to handler)
-
   try {
     const { name, contact, description } = req.body;
     console.log('Received contact form submission:', { name, contact, description });
@@ -38,84 +35,149 @@ app.post('/api/contact', async (req, res) => {
       return res.status(400).json({ success: false, message: 'All fields are required.' });
     }
 
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      return res.status(500).json({
-        success: false,
-        message: 'Email configuration error.'
-      });
-    }
-
-    console.log('Attempting to send email with credentials:', {
-      user: process.env.EMAIL_USER,
-      hasPassword: !!process.env.EMAIL_PASS
-    });
-
-    if (process.env.FORMSPREE_ENDPOINT) {
-      console.log('Using Formspree HTTP API');
-      const fetch = (await import('node-fetch')).default;
-      const formData = new URLSearchParams();
-      formData.append('name', name);
-      formData.append('contact', contact);
-      formData.append('description', description);
-
-      const response = await fetch(process.env.FORMSPREE_ENDPOINT, {
-        method: 'POST',
-        body: formData,
-        headers: { Accept: 'application/json' }
-      });
-
-      if (response.ok) {
-        return res.status(200).json({ success: true, message: 'Message sent successfully!' });
+    // Use Gmail SMTP for local testing, Brevo for production
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Using Gmail SMTP for local testing');
+      
+      // Validate Gmail credentials
+      if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        console.error('EMAIL_USER or EMAIL_PASS environment variables not set');
+        return res.status(500).json({
+          success: false,
+          message: 'Email configuration error.'
+        });
       }
-      throw new Error(`Formspree failed: ${response.status}`);
+      
+      try {
+        const nodemailer = require('nodemailer');
+        
+        // Create transporter
+        const transporter = nodemailer.createTransport({
+          host: 'smtp.gmail.com',
+          port: 587,
+          secure: false,
+          auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+          },
+          tls: { rejectUnauthorized: false }
+        });
+        
+        // Mail options
+        const mailOptions = {
+          from: process.env.EMAIL_USER,
+          to: 'jaganbalusamy@gmail.com',
+          subject: `Portfolio Contact from ${name}`,
+          text: `Name: ${name}\nContact: ${contact}\nMessage: ${description}`
+        };
+        
+        // Send email
+        await transporter.sendMail(mailOptions);
+        console.log('Email sent successfully via Gmail SMTP');
+        
+        return res.status(200).json({
+          success: true,
+          message: 'Message sent successfully!'
+        });
+      } catch (gmailError) {
+        console.error('Gmail SMTP error:', gmailError);
+        throw gmailError;
+      }
+    } else {
+      // Use Brevo (Sendinblue) HTTP API for production
+      console.log('Using Brevo HTTP API for email sending');
+      
+      // Validate Brevo API key
+      if (!process.env.BREVO_API_KEY) {
+        console.error('BREVO_API_KEY environment variable is not set');
+        return res.status(500).json({
+          success: false,
+          message: 'Server configuration error. Please contact administrator.'
+        });
+      }
+      
+      try {
+        const fetch = (await import('node-fetch')).default;
+        
+        // Prepare email data for Brevo API
+        const emailData = {
+          sender: {
+            name: 'Portfolio Contact Form',
+            email: 'jaganbalusamy@gmail.com'
+          },
+          to: [
+            {
+              email: 'jaganbalusamy@gmail.com',
+              name: 'Jagan B'
+            }
+          ],
+          subject: `Portfolio Contact from ${name}`,
+          htmlContent: `
+            <h2>New Contact Form Submission</h2>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Contact Info:</strong> ${contact}</p>
+            <p><strong>Message:</strong></p>
+            <p>${description}</p>
+          `,
+          textContent: `
+            Name: ${name}
+            Contact Info: ${contact}
+            Message: ${description}
+          `
+        };
+        
+        console.log('Sending email via Brevo API...');
+        
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+          method: 'POST',
+          headers: {
+            'accept': 'application/json',
+            'api-key': process.env.BREVO_API_KEY,
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify(emailData)
+        });
+        
+        const responseData = await response.json();
+        
+        if (response.ok) {
+          console.log('Email sent successfully via Brevo API', responseData.messageId);
+          res.status(200).json({ 
+            success: true, 
+            message: 'Message sent successfully!' 
+          });
+        } else {
+          console.error('Brevo API error:', responseData);
+          
+          // Handle specific Brevo errors
+          if (responseData.code === 'permission_denied') {
+            return res.status(403).json({
+              success: false,
+              message: 'Email service needs activation. Please contact administrator.'
+            });
+          }
+          
+          throw new Error(`Brevo API returned status ${response.status}: ${responseData.message}`);
+        }
+      } catch (brevoError) {
+        console.error('Brevo HTTP API failed:', brevoError);
+        if (!res.headersSent) {
+          res.status(500).json({
+            success: false,
+            message: 'Failed to send message. Please try again later.'
+          });
+        }
+      }
     }
-
-    const gmailConfig1 = {
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      },
-      tls: { rejectUnauthorized: false }
-    };
-
-    const gmailConfig2 = {
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      },
-      tls: { rejectUnauthorized: false }
-    };
-
-    try {
-      transporter = nodemailer.createTransport(gmailConfig1);
-      console.log('Created transporter with Gmail config 1');
-    } catch {
-      transporter = nodemailer.createTransport(gmailConfig2);
-      console.log('Created transporter with Gmail config 2');
+    } catch (brevoError) {
+      console.error('Brevo HTTP API failed:', brevoError);
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          message: 'Failed to send message. Please try again later.'
+        });
+      }
     }
-
-    console.log('Transporter created successfully');
-
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: 'jaganbalusamy@gmail.com',
-      subject: `Portfolio Contact from ${name}`,
-      text: `Name: ${name}\nContact: ${contact}\nMessage: ${description}`
-    };
-
-    await transporter.sendMail(mailOptions);
-
-    return res.status(200).json({
-      success: true,
-      message: 'Message sent successfully!'
-    });
-
   } catch (error) {
     console.error('Contact form error:', error);
     if (!res.headersSent) {
