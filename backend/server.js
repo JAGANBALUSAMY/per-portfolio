@@ -169,15 +169,6 @@ app.post('/api/contact', async (req, res) => {
         }
       }
     }
-    } catch (brevoError) {
-      console.error('Brevo HTTP API failed:', brevoError);
-      if (!res.headersSent) {
-        res.status(500).json({
-          success: false,
-          message: 'Failed to send message. Please try again later.'
-        });
-      }
-    }
   } catch (error) {
     console.error('Contact form error:', error);
     if (!res.headersSent) {
