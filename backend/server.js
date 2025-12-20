@@ -66,19 +66,66 @@ app.post('/api/contact', async (req, res) => {
       });
     }
 
-    // Create transporter object using SMTP transport
-    let transporter = nodemailer.createTransport({
+    console.log('Attempting to send email with credentials:', {
+      user: process.env.EMAIL_USER,
+      hasPassword: !!process.env.EMAIL_PASS
+    });
+
+    // Try multiple Gmail configurations
+    let transporter;
+    
+    // Configuration 1: Standard Gmail (port 587, STARTTLS)
+    const gmailConfig1 = {
       host: 'smtp.gmail.com',
       port: 587,
-      secure: false, // true for 465, false for other ports
+      secure: false,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
       },
       tls: {
         rejectUnauthorized: false
+      },
+      connectionTimeout: 30000,
+      greetingTimeout: 30000,
+      socketTimeout: 30000
+    };
+    
+    // Configuration 2: Gmail with SSL (port 465)
+    const gmailConfig2 = {
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      },
+      tls: {
+        rejectUnauthorized: false
+      },
+      connectionTimeout: 30000,
+      greetingTimeout: 30000,
+      socketTimeout: 30000
+    };
+    
+    // Try configuration 1 first
+    try {
+      transporter = nodemailer.createTransport(gmailConfig1);
+      console.log('Created transporter with Gmail config 1 (port 587)');
+    } catch (transportError1) {
+      console.error('Failed to create transporter with Gmail config 1:', transportError1.message);
+      
+      // Try configuration 2
+      try {
+        transporter = nodemailer.createTransport(gmailConfig2);
+        console.log('Created transporter with Gmail config 2 (port 465)');
+      } catch (transportError2) {
+        console.error('Failed to create transporter with Gmail config 2:', transportError2.message);
+        throw new Error('Failed to create email transporter with both Gmail configurations');
       }
-    });
+    }
+
+    console.log('Transporter created successfully');
 
     // Define email options
     let mailOptions = {
@@ -99,23 +146,52 @@ app.post('/api/contact', async (req, res) => {
       `
     };
 
-    try {
-      // Try to send email
-      await transporter.sendMail(mailOptions);
-      console.log('Email sent successfully to jaganbalusamy@gmail.com');
-      res.status(200).json({ 
-        success: true, 
-        message: 'Message sent successfully!' 
-      });
-    } catch (emailError) {
-      console.error('Email sending failed:', emailError);
-      
-      // Return error without saving to file
-      res.status(500).json({ 
-        success: false, 
-        message: 'Failed to send message. Please try again later.',
-        error: process.env.NODE_ENV === 'development' ? emailError.message : undefined
-      });
+    // Add retry logic for email sending
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    while (retryCount <= maxRetries) {
+      try {
+        console.log(`Attempting to send email (attempt ${retryCount + 1}/${maxRetries + 1}):`, {
+          from: mailOptions.from,
+          to: mailOptions.to,
+          subject: mailOptions.subject
+        });
+        
+        // Try to send email
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Email sent successfully to jaganbalusamy@gmail.com', info.messageId);
+        res.status(200).json({ 
+          success: true, 
+          message: 'Message sent successfully!' 
+        });
+        return; // Exit the loop on success
+      } catch (emailError) {
+        retryCount++;
+        console.error(`Email sending failed (attempt ${retryCount}/${maxRetries + 1}):`, emailError);
+        console.error('Error details:', {
+          message: emailError.message,
+          code: emailError.code,
+          command: emailError.command
+        });
+        
+        // If we've reached max retries, return error
+        if (retryCount > maxRetries) {
+          console.error('Max retries reached. Email sending failed permanently.');
+          // Return error without saving to file
+          res.status(500).json({ 
+            success: false, 
+            message: 'Failed to send message after multiple attempts. Please try again later.',
+            error: process.env.NODE_ENV === 'development' ? emailError.message : undefined
+          });
+          return;
+        }
+        
+        // Wait before retrying (exponential backoff)
+        const waitTime = Math.pow(2, retryCount) * 1000; // 2s, 4s, 8s
+        console.log(`Waiting ${waitTime}ms before retry...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
     }
   } catch (error) {
     console.error('Unexpected error in contact form handler:', error);
