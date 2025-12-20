@@ -157,6 +157,13 @@ app.post('/api/contact', async (req, res) => {
             });
           }
           
+          if (responseData.code === 'unauthorized') {
+            return res.status(401).json({
+              success: false,
+              message: 'Email service not properly configured. Please contact administrator.'
+            });
+          }
+          
           throw new Error(`Brevo API returned status ${response.status}: ${responseData.message}`);
         }
       } catch (brevoError) {
