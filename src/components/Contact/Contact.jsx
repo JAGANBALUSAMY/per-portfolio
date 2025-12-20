@@ -44,7 +44,7 @@ const Contact = ({ createSpark }) => {
       // For production, use your Render backend URL
       const backendUrl = process.env.NODE_ENV === 'production' 
         ? 'https://portfolio-backend-cwi0.onrender.com/api/contact' 
-        : 'http://localhost:3001/api/contact';
+        : 'http://localhost:10000/api/contact';
       
       const response = await fetch(backendUrl, {
         method: 'POST',
